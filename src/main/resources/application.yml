@@ -1,0 +1,96 @@
+spring:
+  application:
+    name: GalileoAPI
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/galileo}
+    username: ${DB_USERNAME:galileo}
+    password: ${DB_PASSWORD:galileo}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      minimum-idle: 2
+      connection-timeout: 30000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: true
+  flyway:
+    enabled: true
+  data:
+    redis:
+      client-type: ${REDIS_CLIENT_TYPE:jedis}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      connect-timeout: ${REDIS_CONNECT_TIMEOUT:2s}
+      timeout: ${REDIS_COMMAND_TIMEOUT:1s}
+      repositories:
+        enabled: false
+  cache:
+    type: redis
+    cache-names: departments,teams,users,roles
+    redis:
+      cache-null-values: false
+      use-key-prefix: true
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,caches
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+app:
+  server:
+    tomcat-nio2: ${APP_SERVER_TOMCAT_NIO2:false}
+  security:
+    jwt:
+      issuer: ${JWT_ISSUER:galileo-api}
+      secret: ${JWT_SECRET:local-development-secret-change-before-production-12345}
+      access-token-ttl: ${JWT_TTL:PT1H}
+  bootstrap:
+    enabled: ${BOOTSTRAP_ADMIN_ENABLED:true}
+    admin-email: ${BOOTSTRAP_ADMIN_EMAIL:admin@galileo.local}
+    admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:Admin123!}
+  cache:
+    department-ttl: ${DEPARTMENT_CACHE_TTL:PT10M}
+    team-ttl: ${TEAM_CACHE_TTL:PT5M}
+    user-ttl: ${USER_CACHE_TTL:PT2M}
+    role-ttl: ${ROLE_CACHE_TTL:PT30M}
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{correlationId:-}]"
+  level:
+    root: INFO
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:INFO}

@@ -1,0 +1,9 @@
+package com.galileo.api.user;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record PasswordChangeRequest(
+        @NotBlank @Size(min = 12, max = 72) String newPassword
+) {
+}
